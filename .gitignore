@@ -1,0 +1,7 @@
+echo __pycache__/ >> .gitignore
+echo *.pyc >> .gitignore
+echo .env >> .gitignore
+echo .env.local >> .gitignore
+echo node_modules/ >> .gitignore
+echo dist/ >> .gitignore
+echo *.log >> .gitignore
