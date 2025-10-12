@@ -1,7 +1,17 @@
-echo __pycache__/ >> .gitignore
-echo *.pyc >> .gitignore
-echo .env >> .gitignore
-echo .env.local >> .gitignore
-echo node_modules/ >> .gitignore
-echo dist/ >> .gitignore
-echo *.log >> .gitignore
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+
+# Node
+node_modules/
+dist/
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# VSCode
+.vscode/
