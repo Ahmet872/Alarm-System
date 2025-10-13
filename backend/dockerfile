@@ -10,11 +10,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Sistem paketleri + curl kurulumu
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     build-essential \
-    curl \  # healthcheck için
+    curl \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
