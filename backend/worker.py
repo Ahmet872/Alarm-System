@@ -1,5 +1,5 @@
-import asyncio
 import logging
+from time import sleep
 from datetime import datetime
 import typer
 
@@ -13,18 +13,16 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 logger = logging.getLogger("alarm-worker")
-app = typer.Typer(help="Financial One-shot Alarm Worker (full async)")
+app = typer.Typer(help="Financial One-shot Alarm Worker (sync)")
 
-# --- async alarm processor ---
-async def process_alarm(alarm):
+def process_alarm(alarm):
     db = SessionLocal()
     try:
-        await asyncio.sleep(0)  # yield control
         # Update status to processing
         crud.update_alarm_status(db, alarm.id, "processing")
 
-        # Fetch price async
-        current_price = await services.async_fetch_price(alarm.asset_class, alarm.asset_symbol)
+        # Fetch price (sync)
+        current_price = services.fetch_price(alarm.asset_class, alarm.asset_symbol)
         if current_price is None:
             logger.error(f"Failed to fetch price for alarm {alarm.id}")
             crud.update_alarm_status(db, alarm.id, "failed")
@@ -32,7 +30,7 @@ async def process_alarm(alarm):
 
         # Evaluate condition
         if services.evaluate_condition(alarm, current_price):
-            sent = await services.async_send_email(alarm, current_price)
+            sent = services.send_email(alarm, current_price)
             if sent:
                 logger.info(f"Alarm {alarm.id} triggered and email sent")
                 crud.delete_alarm(db, alarm.id)
@@ -51,7 +49,7 @@ async def process_alarm(alarm):
     finally:
         db.close()
 
-async def process_all_alarms():
+def process_all_alarms():
     db = SessionLocal()
     try:
         alarms = crud.get_pending_alarms(db)
@@ -59,8 +57,8 @@ async def process_all_alarms():
             logger.debug("No pending alarms found.")
             return
 
-        tasks = [process_alarm(alarm) for alarm in alarms]
-        await asyncio.gather(*tasks)
+        for alarm in alarms:
+            process_alarm(alarm)
     finally:
         db.close()
 
@@ -70,19 +68,16 @@ def run(
     once: bool = typer.Option(False, "--once", help="Run once and exit"),
     delay: int = typer.Option(60, "--delay", help="Scan interval in seconds")
 ):
-    async def _loop():
-        logger.info("🚀 Alarm worker started (once=%s, delay=%ds)", once, delay)
-        while True:
-            try:
-                await process_all_alarms()
-            except Exception:
-                logger.exception("Unhandled error in process_all_alarms")
-            if once:
-                logger.info("Worker finished single run.")
-                break
-            await asyncio.sleep(delay)
-
-    asyncio.run(_loop())
+    logger.info("🚀 Alarm worker started (once=%s, delay=%ds)", once, delay)
+    while True:
+        try:
+            process_all_alarms()
+        except Exception:
+            logger.exception("Unhandled error in process_all_alarms")
+        if once:
+            logger.info("Worker finished single run.")
+            break
+        sleep(delay)
 
 if __name__ == "__main__":
     app()

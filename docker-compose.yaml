@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.9"
 
 services:
   db:
@@ -34,7 +34,7 @@ services:
       - ENV=${ENV}
       - TZ=UTC
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -47,7 +47,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: ["python", "worker.py", "run", "--delay", "60"]
+    command: ["python", "worker.py"]
     environment:
       - DATABASE_URL=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db/${MYSQL_DB}
       - SMTP_HOST=${SMTP_HOST}
@@ -70,10 +70,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_URL=http://backend:8000
       - TZ=UTC
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -1,2 +1,0 @@
-from schemas import AssetsResponse, AssetModel
-print("Schemas import çalışıyor")
