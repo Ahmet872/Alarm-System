@@ -1,0 +1,47 @@
+# Ortak
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+*.log
+*.pyc
+__pycache__/
+
+# Node / Next.js
+node_modules
+.next
+npm-debug.log
+yarn-error.log
+
+# Python
+*.egg-info
+*.pyo
+*.pyd
+venv
+.env
+.env.*
+__pycache__/
+
+# Lambda geçici dosyalar
+lambda_pkg
+*.zip
+
+# Migrations cache
+migrations/__pycache__/
+
+# Docker & Build
+docker-compose.override.yml
+*.tmp
+*.bak
+
+# Test / Docs / Notlar
+alarm.txt
+api keys.txt
+project_structure.txt
+yapı11.txt
+
+# OS / IDE / cache
+Thumbs.db
+.cache
+coverage

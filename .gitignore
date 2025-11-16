@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+node_modules/
+.next/
+.env.local
+.env.development
+.env.production
+.DS_Store
+*.log
+.git/
+.vscode/
+.idea/
+api keys.txt
+project_structure.txt

@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  # MySQL database service
+  db:
+    image: mysql:8.0
+    container_name: alarm_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: alarm_system
+      MYSQL_USER: alarm_user
+      MYSQL_PASSWORD: alarm_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "alarm_user", "-palarm_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  # FastAPI backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: alarm_backend
+    environment:
+      - DATABASE_URL=mysql+pymysql://alarm_user:alarm_password@alarm_mysql:3306/alarm_system
+      - ENV=development
+      - LOG_LEVEL=info
+      - FRONTEND_ORIGIN=http://localhost:3000
+      - SQL_ECHO=true
+      - PRICE_API_URL=https://api.coingecko.com/api/v3
+      - MAIL_BACKEND=smtp
+      - SMTP_HOST=maildev
+      - SMTP_PORT=1025
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  # Next.js frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: alarm_frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  # Local email testing service
+  maildev:
+    image: maildev/maildev:latest
+    container_name: alarm_maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - app_network
+    restart: unless-stopped
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
