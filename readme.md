@@ -260,5 +260,5 @@ MIT License - See LICENSE file for details
 ---
 
 **Last Updated**: November 16, 2025  
-**Author**: [Ahmet8721](https://github.com/Ahmet8721)  
+**Author**: [Ahmet872](https://github.com/Ahmet8721)  
 **Status**: 🚀 Production Ready - Lambda + RDS running on AWS
